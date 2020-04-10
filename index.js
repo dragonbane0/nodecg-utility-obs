@@ -12,10 +12,21 @@ const usedNamespaces = new Set();
 class OBSUtility extends OBSWebSocket {
 	constructor(nodecg, opts = {}) {
 		let namespace = opts.namespace;
+		let url = opts.url;
+		let port = opts.port;
+		let mesh = opts.mesh;
 		if (typeof opts.namespace === 'undefined') {
 			namespace = 'obs';
 		}
-
+		if (typeof opts.url === 'undefined') {
+			url = '';
+		}
+		if (typeof opts.port === 'undefined') {
+			port = '';
+		}
+		if (typeof opts.mesh === 'undefined') {
+			mesh = '';
+		}
 		if (usedNamespaces.has(namespace)) {
 			throw new Error(`Namespace "${namespace}" has already been used. Please choose a different namespace.`);
 		}
@@ -24,11 +35,14 @@ class OBSUtility extends OBSWebSocket {
 
 		usedNamespaces.add(namespace);
 		this.namespace = namespace;
+		this.url = url;
+		this.port = port;
+		this.mesh = mesh;
 		const namespacesReplicant = nodecg.Replicant('_obs:namespaces', {
 			schemaPath: buildSchemaPath('namespaces'),
 			persistent: false
 		});
-		namespacesReplicant.value.push(namespace);
+		namespacesReplicant.value.push({"name": namespace, "url": url, "port": port, "mesh": mesh});
 
 		this._ignoreConnectionClosedEvents = false;
 		const websocketConfig = nodecg.Replicant(`${namespace}:websocket`, {schemaPath: buildSchemaPath('websocket')});
